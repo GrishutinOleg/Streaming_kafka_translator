@@ -1,7 +1,7 @@
 import org.apache.spark.sql.{SaveMode, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{IntegerType, LongType, StringType, StructField, StructType}
-
+import org.apache.spark.sql.streaming.{OutputMode, Trigger}
 
 
 object Stream_translator extends App {
@@ -34,13 +34,12 @@ object Stream_translator extends App {
 
   df.printSchema()
 
-  //val df1 =
-  //df.selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
-   // .as[(String, String)]
+  val df1 = df.selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
+    .as[(String, String)]
     //.cache()
     //.localCheckpoint()
 
-  /*val df3 = df1.select(from_json(col("value"), itemsschema).as("data")).select("data.*")
+  val df3 = df1.select(from_json(col("value"), itemsschema).as("data")).select("data.*")
 
 
   val df4 = df3.writeStream
@@ -48,7 +47,7 @@ object Stream_translator extends App {
     .outputMode("append")
     .start()
     .awaitTermination()
-*/
+
 
   //df.show()
 
@@ -61,6 +60,7 @@ object Stream_translator extends App {
     .format("kafka")
     .outputMode("append")
     .option("kafka.bootstrap.servers", "localhost:9092")
+    .option("checkpointLocation", "/tmp/spark-streaming-pca-writing/checkpoint")
     .option("topic", topicoutput)
     .start()
     .awaitTermination()
